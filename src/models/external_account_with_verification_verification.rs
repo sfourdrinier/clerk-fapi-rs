@@ -12,15 +12,28 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "object")]
+#[serde(untagged)]
 pub enum ExternalAccountWithVerificationVerification {
+    ClientSdkVerification(Box<models::ClientSdkVerification>),
+    Fapi(Box<FapiExternalAccountWithVerificationVerification>),
+}
+
+impl Default for ExternalAccountWithVerificationVerification {
+    fn default() -> Self {
+        Self::Fapi(Box::default())
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "object")]
+pub enum FapiExternalAccountWithVerificationVerification {
     #[serde(rename = "verification_oauth")]
     VerificationOauth(Box<models::VerificationOauth>),
     #[serde(rename = "verification_google_one_tap")]
     VerificationGoogleOneTap(Box<models::VerificationGoogleOneTap>),
 }
 
-impl Default for ExternalAccountWithVerificationVerification {
+impl Default for FapiExternalAccountWithVerificationVerification {
     fn default() -> Self {
         Self::VerificationOauth(Default::default())
     }

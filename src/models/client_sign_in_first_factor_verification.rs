@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ClientSignInFirstFactorVerification {
+    ClientSdkVerification(Box<models::ClientSdkVerification>),
     StubsVerificationPassword(Box<models::StubsVerificationPassword>),
     StubsVerificationOauth(Box<models::StubsVerificationOauth>),
     StubsVerificationOtp(Box<models::StubsVerificationOtp>),

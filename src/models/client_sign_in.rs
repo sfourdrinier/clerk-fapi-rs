@@ -19,7 +19,7 @@ pub struct ClientSignIn {
     #[serde(rename = "id")]
     pub id: String,
     #[serde(rename = "status")]
-    pub status: Status,
+    pub status: Option<Status>,
     /// List of supported identifiers that can be used to sign in.
     #[serde(rename = "supported_identifiers")]
     pub supported_identifiers: Vec<SupportedIdentifiers>,
@@ -75,7 +75,7 @@ impl ClientSignIn {
         ClientSignIn {
             object,
             id,
-            status,
+            status: Some(status),
             supported_identifiers,
             supported_first_factors,
             supported_second_factors,

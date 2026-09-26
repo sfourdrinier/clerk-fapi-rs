@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ClientSamlAccountVerification {
+    ClientSdkVerification(Box<models::ClientSdkVerification>),
     StubsVerificationSaml(Box<models::StubsVerificationSaml>),
     StubsVerificationTicket(Box<models::StubsVerificationTicket>),
 }

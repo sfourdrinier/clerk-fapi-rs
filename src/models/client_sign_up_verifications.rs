@@ -14,11 +14,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ClientSignUpVerifications {
     #[serde(rename = "email_address", deserialize_with = "Option::deserialize")]
-    pub email_address: Option<Box<models::StubsSignUpVerification>>,
+    pub email_address: Option<Box<models::ClientSignUpVerification>>,
     #[serde(rename = "phone_number", deserialize_with = "Option::deserialize")]
-    pub phone_number: Option<Box<models::StubsSignUpVerification>>,
+    pub phone_number: Option<Box<models::ClientSignUpVerification>>,
     #[serde(rename = "web3_wallet", deserialize_with = "Option::deserialize")]
-    pub web3_wallet: Option<Box<models::StubsSignUpVerification>>,
+    pub web3_wallet: Option<Box<models::ClientSignUpVerification>>,
     #[serde(rename = "external_account", deserialize_with = "Option::deserialize")]
     pub external_account: Option<Box<models::ClientSignUpVerificationsExternalAccount>>,
 }
@@ -31,9 +31,21 @@ impl ClientSignUpVerifications {
         external_account: Option<models::ClientSignUpVerificationsExternalAccount>,
     ) -> ClientSignUpVerifications {
         ClientSignUpVerifications {
-            email_address: email_address.map(Box::new),
-            phone_number: phone_number.map(Box::new),
-            web3_wallet: web3_wallet.map(Box::new),
+            email_address: email_address.map(|verification| {
+                Box::new(models::ClientSignUpVerification::StubsSignUpVerification(
+                    Box::new(verification),
+                ))
+            }),
+            phone_number: phone_number.map(|verification| {
+                Box::new(models::ClientSignUpVerification::StubsSignUpVerification(
+                    Box::new(verification),
+                ))
+            }),
+            web3_wallet: web3_wallet.map(|verification| {
+                Box::new(models::ClientSignUpVerification::StubsSignUpVerification(
+                    Box::new(verification),
+                ))
+            }),
             external_account: external_account.map(Box::new),
         }
     }

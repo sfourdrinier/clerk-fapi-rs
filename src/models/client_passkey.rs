@@ -19,7 +19,7 @@ pub struct ClientPasskey {
     #[serde(rename = "object")]
     pub object: Object,
     #[serde(rename = "name")]
-    pub name: String,
+    pub name: Option<String>,
     /// Unix timestamp of when the passkey was last used.
     #[serde(
         rename = "last_used_at",
@@ -29,7 +29,7 @@ pub struct ClientPasskey {
     )]
     pub last_used_at: Option<Option<i64>>,
     #[serde(rename = "verification", deserialize_with = "Option::deserialize")]
-    pub verification: Option<Box<models::StubsVerificationPasskey>>,
+    pub verification: Option<Box<models::ClientPasskeyVerification>>,
     /// Unix timestamp of creation
     #[serde(rename = "created_at", skip_serializing_if = "Option::is_none")]
     pub created_at: Option<i64>,
@@ -48,9 +48,13 @@ impl ClientPasskey {
         ClientPasskey {
             id,
             object,
-            name,
+            name: Some(name),
             last_used_at: None,
-            verification: verification.map(Box::new),
+            verification: verification.map(|verification| {
+                Box::new(models::ClientPasskeyVerification::StubsVerificationPasskey(
+                    Box::new(verification),
+                ))
+            }),
             created_at: None,
             updated_at: None,
         }

@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ClientWeb3WalletVerification {
+    ClientSdkVerification(Box<models::ClientSdkVerification>),
     StubsVerificationWeb3Signature(Box<models::StubsVerificationWeb3Signature>),
     StubsVerificationAdmin(Box<models::StubsVerificationAdmin>),
 }

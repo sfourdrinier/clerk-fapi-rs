@@ -20,7 +20,7 @@ pub struct ClientSignUp {
     #[serde(rename = "id")]
     pub id: String,
     #[serde(rename = "status")]
-    pub status: Status,
+    pub status: Option<Status>,
     /// List of required fields which need to be supplied to the current sign-up. These fields are mandatory in order for the sign-up to satisfy the attached registration policy and be marked as complete.
     #[serde(rename = "required_fields")]
     pub required_fields: Vec<String>,
@@ -102,7 +102,7 @@ impl ClientSignUp {
         ClientSignUp {
             object,
             id,
-            status,
+            status: Some(status),
             required_fields,
             optional_fields,
             missing_fields,

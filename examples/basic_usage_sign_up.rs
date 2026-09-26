@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
 
-    if verification_response.status == Status::Complete {
+    if verification_response.status == Some(Status::Complete) {
         println!("Sign up successful!");
     } else {
         println!("Sign up failed. Status: {:?}", verification_response.status);
