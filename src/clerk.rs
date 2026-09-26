@@ -37,12 +37,16 @@ pub enum ClerkLoadError {
     DevFailedToLoadDevBrowser,
     FailedToLoadEnv,
     FailedToLoadClient,
+    IncompatibleClientResponse,
 }
 impl fmt::Display for ClerkLoadError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ClerkLoadError::FailedToLoadEnv => write!(f, "Failed to load Clerk environment"),
             ClerkLoadError::FailedToLoadClient => write!(f, "Failed to load Clerk client"),
+            ClerkLoadError::IncompatibleClientResponse => {
+                write!(f, "Clerk client response is incompatible")
+            }
             ClerkLoadError::DevFailedToLoadDevBrowser => {
                 write!(f, "Failed to load development browser")
             }
@@ -50,6 +54,13 @@ impl fmt::Display for ClerkLoadError {
     }
 }
 impl Error for ClerkLoadError {}
+
+fn classify_client_api_error<T>(error: &crate::apis::Error<T>) -> ClerkLoadError {
+    match error {
+        crate::apis::Error::Serde(_) => ClerkLoadError::IncompatibleClientResponse,
+        _ => ClerkLoadError::FailedToLoadClient,
+    }
+}
 
 #[derive(Debug)]
 pub enum ClerkSetActiveError {
@@ -163,8 +174,7 @@ impl Clerk {
             .await
             .map_err(|e| {
                 error!("Clerk: Failed to load client from API: {e}");
-                println!("Clerk: Failed to load client from API: {e}");
-                ClerkLoadError::FailedToLoadClient
+                classify_client_api_error(&e)
             })?
             .ok_or(ClerkLoadError::FailedToLoadClient)
     }
@@ -183,7 +193,13 @@ impl Clerk {
         }
 
         let mut environment = self.load_environment_from_api().await.ok();
-        let mut client = self.load_client_from_api().await.ok();
+        let mut client = match self.load_client_from_api().await {
+            Ok(client) => Some(client),
+            Err(ClerkLoadError::IncompatibleClientResponse) => {
+                return Err(ClerkLoadError::IncompatibleClientResponse)
+            }
+            Err(_) => None,
+        };
 
         if environment.is_none() {
             environment = self.load_environment_from_cache();
@@ -558,5 +574,20 @@ impl Clerk {
 
         // We rely on the callback mechanism to update the state
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod client_load_tests {
+    use super::{classify_client_api_error, ClerkLoadError};
+
+    #[test]
+    fn classifies_invalid_client_json_as_incompatible() {
+        let parse_error = serde_json::from_str::<bool>("not-json").unwrap_err();
+        let api_error = crate::apis::Error::<()>::Serde(parse_error);
+        assert!(matches!(
+            classify_client_api_error(&api_error),
+            ClerkLoadError::IncompatibleClientResponse
+        ));
     }
 }
