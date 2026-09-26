@@ -54,7 +54,7 @@ pub struct ClientSignIn {
     pub created_session_id: Option<String>,
     /// Unix timestamp at which the sign in will be abandoned.
     #[serde(rename = "abandon_at")]
-    pub abandon_at: i64,
+    pub abandon_at: Option<i64>,
 }
 
 impl ClientSignIn {
@@ -84,13 +84,15 @@ impl ClientSignIn {
             identifier,
             user_data: user_data.map(Box::new),
             created_session_id,
-            abandon_at,
+            abandon_at: Some(abandon_at),
         }
     }
 }
 /// String representing the object's type. Objects of the same type share the same value.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum Object {
+    #[serde(rename = "sign_in")]
+    SignIn,
     #[serde(rename = "sign_in_attempt")]
     SignInAttempt,
 }

@@ -67,7 +67,7 @@ pub struct ClientUser {
     #[serde(rename = "external_accounts")]
     pub external_accounts: Vec<models::ExternalAccountWithVerification>,
     #[serde(rename = "saml_accounts")]
-    pub saml_accounts: Vec<models::ClientSamlAccount>,
+    pub saml_accounts: Option<Vec<models::ClientSamlAccount>>,
     /// Unix timestamp of last update.
     #[serde(
         rename = "password_last_updated_at",
@@ -89,28 +89,30 @@ pub struct ClientUser {
     pub last_sign_in_at: Option<i64>,
     /// Flag to denote whether user is banned or not.
     #[serde(rename = "banned")]
-    pub banned: bool,
+    pub banned: Option<bool>,
     /// Flag to denote whether user is currently locked, i.e. restricted from signing in or not.
     #[serde(rename = "locked")]
-    pub locked: bool,
+    pub locked: Option<bool>,
     /// The number of seconds remaining until the lockout period expires for a locked user. A null value for a locked user indicates that lockout never expires.
     #[serde(
         rename = "lockout_expires_in_seconds",
+        default,
         deserialize_with = "Option::deserialize"
     )]
     pub lockout_expires_in_seconds: Option<i64>,
     /// The number of verification attempts remaining until the user is locked. Null if account lockout is not enabled. Note: if a user is locked explicitly via the Backend API, they may still have verification attempts remaining.
     #[serde(
         rename = "verification_attempts_remaining",
+        default,
         deserialize_with = "Option::deserialize"
     )]
     pub verification_attempts_remaining: Option<i64>,
     /// Unix timestamp of creation.
     #[serde(rename = "created_at")]
-    pub created_at: i64,
+    pub created_at: Option<i64>,
     /// Unix timestamp of last update.
     #[serde(rename = "updated_at")]
-    pub updated_at: i64,
+    pub updated_at: Option<i64>,
     /// If enabled, user can delete themselves via FAPI.
     #[serde(rename = "delete_self_enabled")]
     pub delete_self_enabled: bool,
@@ -124,13 +126,25 @@ pub struct ClientUser {
     )]
     pub create_organizations_limit: Option<i64>,
     /// Unix timestamp of the latest session activity, with day precision.
-    #[serde(rename = "last_active_at", deserialize_with = "Option::deserialize")]
+    #[serde(
+        rename = "last_active_at",
+        default,
+        deserialize_with = "Option::deserialize"
+    )]
     pub last_active_at: Option<i64>,
     /// Unix timestamp at which the user enabled MFA.
-    #[serde(rename = "mfa_enabled_at", deserialize_with = "Option::deserialize")]
+    #[serde(
+        rename = "mfa_enabled_at",
+        default,
+        deserialize_with = "Option::deserialize"
+    )]
     pub mfa_enabled_at: Option<i64>,
     /// Unix timestamp at which the user disabled MFA.
-    #[serde(rename = "mfa_disabled_at", deserialize_with = "Option::deserialize")]
+    #[serde(
+        rename = "mfa_disabled_at",
+        default,
+        deserialize_with = "Option::deserialize"
+    )]
     pub mfa_disabled_at: Option<i64>,
     /// Unix timestamp at which the user accepted the legal requirements.
     #[serde(rename = "legal_accepted_at", deserialize_with = "Option::deserialize")]
@@ -198,19 +212,19 @@ impl ClientUser {
             passkeys,
             organization_memberships: None,
             external_accounts,
-            saml_accounts,
+            saml_accounts: Some(saml_accounts),
             password_last_updated_at: None,
             public_metadata,
             private_metadata: None,
             unsafe_metadata: None,
             external_id,
             last_sign_in_at,
-            banned,
-            locked,
+            banned: Some(banned),
+            locked: Some(locked),
             lockout_expires_in_seconds,
             verification_attempts_remaining,
-            created_at,
-            updated_at,
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
             delete_self_enabled,
             create_organization_enabled,
             create_organizations_limit: None,

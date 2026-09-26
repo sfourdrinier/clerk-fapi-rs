@@ -2,12 +2,17 @@
 
 use clerk_fapi_rs::models::{
     ClientClient, ClientEmailAddressVerification, ClientPasskeyVerification, ClientSdkVerification,
-    ClientSignInFirstFactorVerification, ClientSignUpVerification, ClientUser,
+    ClientSignInFirstFactorVerification, ClientSignUpVerification,
     ExternalAccountWithVerificationVerification,
 };
 use serde_json::{json, Value};
 
 fn sdk_verification(strategy: Option<&str>, error: Value) -> Value {
+    let error = if error.is_null() {
+        json!({"code": "", "message": "", "meta": {}})
+    } else {
+        error
+    };
     json!({
         "object": "verification",
         "id": "",
@@ -34,21 +39,33 @@ fn client_sdk_snapshot_deserializes_generic_verifications_without_losing_session
     google["status"] = json!("verified");
     google["verified_at_client"] = json!("client_snapshot");
     let apple = sdk_verification(Some("oauth_apple"), Value::Null);
-    let mut user = serde_json::to_value(ClientUser::default()).unwrap();
-    user["id"] = json!("user_snapshot");
+    let mut user = json!({
+        "object": "user", "id": "user_snapshot", "external_id": null,
+        "first_name": null, "last_name": null, "username": null,
+        "public_metadata": {}, "unsafe_metadata": {}, "image_url": "", "has_image": false,
+        "email_addresses": [], "phone_numbers": [], "web3_wallets": [], "external_accounts": [],
+        "passkeys": [], "organization_memberships": [], "enterprise_accounts": [],
+        "totp_enabled": false, "backup_code_enabled": false, "two_factor_enabled": false,
+        "create_organization_enabled": false, "create_organizations_limit": 0,
+        "delete_self_enabled": false, "primary_email_address_id": null,
+        "primary_phone_number_id": null, "primary_web3_wallet_id": null,
+        "password_enabled": false, "profile_image_id": "", "last_sign_in_at": null,
+        "legal_accepted_at": null, "updated_at": null, "created_at": null
+    });
     user["email_addresses"] = json!([{
         "id": "idn_email_snapshot", "object": "email_address", "email_address": "snapshot@example.test",
-        "reserved": false, "verification": generic, "linked_to": [], "created_at": 1731327798987i64,
-        "updated_at": 1731327903492i64
+        "verification": generic,
+        "linked_to": [{"object": "identification_link", "type": "oauth_google", "id": "idn_google_snapshot"}],
+        "matches_sso_connection": false
     }]);
     user["phone_numbers"] = json!([{
         "id": "idn_phone_snapshot", "object": "phone_number", "phone_number": "+15555550100",
-        "reserved": false, "verification": google.clone(), "linked_to": [], "created_at": 1731327798987i64,
-        "updated_at": 1731327903492i64
+        "reserved_for_second_factor": false, "default_second_factor": false,
+        "verification": google.clone(), "linked_to": [], "backup_codes": null
     }]);
     user["web3_wallets"] = json!([{
         "id": "idn_wallet_snapshot", "object": "web3_wallet", "web3_wallet": "0x0000000000000000000000000000000000000001",
-        "verification": apple, "created_at": 1731327798987i64, "updated_at": 1731327903492i64
+        "verification": apple
     }]);
     user["passkeys"] = json!([{
         "id": "pk_snapshot", "object": "passkey", "name": null,
@@ -57,19 +74,19 @@ fn client_sdk_snapshot_deserializes_generic_verifications_without_losing_session
     }]);
     user["external_accounts"] = json!([
         {
-            "object": "external_account", "id": "idn_google_snapshot", "provider": "oauth_google",
+            "object": "external_account", "id": "idn_google_snapshot", "provider": "google",
             "identification_id": "google-subject", "provider_user_id": "google-subject", "approved_scopes": "email",
             "email_address": "snapshot@example.test", "first_name": "Snapshot", "last_name": "User",
             "avatar_url": null, "image_url": null, "username": null, "phone_number": null,
-            "public_metadata": {}, "label": null, "created_at": 1731327798987i64, "updated_at": 1731327903492i64,
+            "public_metadata": {}, "label": null,
             "verification": google
         },
         {
-            "object": "external_account", "id": "idn_apple_snapshot", "provider": "oauth_apple",
+            "object": "external_account", "id": "idn_apple_snapshot", "provider": "apple",
             "identification_id": "apple-subject", "provider_user_id": "apple-subject", "approved_scopes": "email",
             "email_address": "snapshot@example.test", "first_name": "Snapshot", "last_name": "User",
             "avatar_url": null, "image_url": null, "username": null, "phone_number": null,
-            "public_metadata": {}, "label": null, "created_at": 1731327798987i64, "updated_at": 1731327903492i64,
+            "public_metadata": {}, "label": null,
             "verification": sdk_verification(Some("oauth_apple"), Value::Null)
         }
     ]);
@@ -80,25 +97,26 @@ fn client_sdk_snapshot_deserializes_generic_verifications_without_losing_session
         "last_active_at": 1731327903492i64,
         "last_active_token": {"object": "token", "jwt": "synthetic.header.signature"},
         "actor": null, "tasks": null, "last_active_organization_id": null, "user": user,
-        "public_user_data": null, "factor_verification_age": [0, 1],
+        "public_user_data": {"first_name": null, "last_name": null, "image_url": null, "has_image": null},
+        "factor_verification_age": [0, 1],
         "created_at": 1731327798987i64, "updated_at": 1731327903492i64
     });
 
     let mut snapshot = json!({
         "object": "client", "id": "client_snapshot", "sessions": [session],
         "sign_in": null, "sign_up": null, "last_active_session_id": "sess_snapshot",
-        "cookie_expires_at": null, "captcha_bypass": false,
+        "cookie_expires_at": null, "captcha_bypass": false, "last_authentication_strategy": null,
         "created_at": 1731327798987i64, "updated_at": 1731327903492i64
     });
     snapshot["sign_in"] = json!({
-        "object": "sign_in_attempt", "id": "sign_in_snapshot", "status": null,
+        "object": "sign_in", "id": "sign_in_snapshot", "status": null,
         "supported_identifiers": [], "supported_first_factors": null, "supported_second_factors": null,
         "first_factor_verification": sdk_verification(Some("oauth_google"), Value::Null),
         "second_factor_verification": sdk_verification(Some("oauth_apple"), Value::Null),
-        "identifier": null, "user_data": null, "created_session_id": null, "abandon_at": 1731327903492i64
+        "identifier": null, "user_data": {"image_url": null, "has_image": null}, "created_session_id": null, "protect_check": null
     });
     snapshot["sign_up"] = json!({
-        "object": "sign_up_attempt", "id": "sign_up_snapshot", "status": null,
+        "object": "sign_up", "id": "sign_up_snapshot", "status": null,
         "required_fields": [], "optional_fields": [], "missing_fields": [], "unverified_fields": [],
         "verifications": {
             "email_address": {"next_action": "needs_prepare", "supported_strategies": ["email_code"], "object": "verification", "id": "", "status": "unverified", "strategy": "email_code", "nonce": null, "message": null, "external_verification_redirect_url": null, "attempts": null, "expire_at": null, "error": null, "verified_at_client": null},
@@ -106,9 +124,10 @@ fn client_sdk_snapshot_deserializes_generic_verifications_without_losing_session
             "external_account": sdk_verification(Some("oauth_apple"), Value::Null)
         },
         "username": null, "email_address": null, "phone_number": null, "web3_wallet": null,
-        "password_enabled": false, "first_name": null, "last_name": null, "custom_action": false,
-        "external_id": null, "created_session_id": null, "created_user_id": null,
-        "abandon_at": 1731327903492i64, "legal_accepted_at": null
+        "has_password": false, "first_name": null, "last_name": null,
+        "unsafe_metadata": {}, "created_session_id": null, "created_user_id": null,
+        "abandon_at": null, "legal_accepted_at": null, "locale": null,
+        "external_account": null, "external_account_strategy": null, "protect_check": null
     });
 
     let client: ClientClient = serde_json::from_value(snapshot).unwrap();
@@ -117,8 +136,8 @@ fn client_sdk_snapshot_deserializes_generic_verifications_without_losing_session
         client.last_active_session_id.as_deref(),
         Some("sess_snapshot")
     );
-    assert_eq!(client.created_at, 1731327798987i64);
-    assert_eq!(client.updated_at, 1731327903492i64);
+    assert_eq!(client.created_at, Some(1731327798987i64));
+    assert_eq!(client.updated_at, Some(1731327903492i64));
     assert_eq!(client.sessions[0].id, "sess_snapshot");
     assert_eq!(client.sessions[0].last_active_at, 1731327903492i64);
     assert_eq!(
@@ -133,7 +152,21 @@ fn client_sdk_snapshot_deserializes_generic_verifications_without_losing_session
     );
     assert_eq!(client.sign_in.as_ref().unwrap().status, None);
     assert_eq!(client.sign_up.as_ref().unwrap().status, None);
+    assert!(matches!(
+        client.sign_in.as_ref().unwrap().object,
+        clerk_fapi_rs::models::client_sign_in::Object::SignIn
+    ));
+    assert!(matches!(
+        client.sign_up.as_ref().unwrap().object,
+        clerk_fapi_rs::models::client_sign_up::Object::SignUp
+    ));
+    assert_eq!(
+        serde_json::to_value(&client).unwrap()["sign_up"]["has_password"],
+        false
+    );
     let user = client.sessions[0].user.as_ref().unwrap();
+    assert_eq!(user.created_at, None);
+    assert_eq!(user.updated_at, None);
     let Some(ClientEmailAddressVerification::ClientSdkVerification(email)) =
         user.email_addresses[0].verification.as_deref()
     else {
@@ -144,6 +177,9 @@ fn client_sdk_snapshot_deserializes_generic_verifications_without_losing_session
         "form_identifier_not_found"
     );
     assert_eq!(email.verified_at_client, None);
+    assert_eq!(user.email_addresses[0].reserved, None);
+    assert_eq!(user.email_addresses[0].created_at, None);
+    assert_eq!(user.external_accounts[0].created_at, None);
     assert!(matches!(
         user.passkeys[0].verification.as_deref(),
         Some(ClientPasskeyVerification::ClientSdkVerification(_))

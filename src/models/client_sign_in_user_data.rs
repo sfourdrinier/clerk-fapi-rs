@@ -13,14 +13,22 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ClientSignInUserData {
-    #[serde(rename = "first_name", deserialize_with = "Option::deserialize")]
+    #[serde(
+        rename = "first_name",
+        default,
+        deserialize_with = "Option::deserialize"
+    )]
     pub first_name: Option<String>,
-    #[serde(rename = "last_name", deserialize_with = "Option::deserialize")]
+    #[serde(
+        rename = "last_name",
+        default,
+        deserialize_with = "Option::deserialize"
+    )]
     pub last_name: Option<String>,
     #[serde(rename = "image_url", skip_serializing_if = "Option::is_none")]
     pub image_url: Option<String>,
     #[serde(rename = "has_image")]
-    pub has_image: bool,
+    pub has_image: Option<bool>,
     /// Use `image_url` instead.
     #[serde(
         rename = "profile_image_url",
@@ -41,7 +49,7 @@ impl ClientSignInUserData {
             first_name,
             last_name,
             image_url: None,
-            has_image,
+            has_image: Some(has_image),
             profile_image_url: None,
         }
     }

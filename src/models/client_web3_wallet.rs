@@ -24,10 +24,10 @@ pub struct ClientWeb3Wallet {
     pub verification: Option<Box<models::ClientWeb3WalletVerification>>,
     /// Unix timestamp of creation
     #[serde(rename = "created_at")]
-    pub created_at: i64,
+    pub created_at: Option<i64>,
     /// Unix timestamp of creation
     #[serde(rename = "updated_at")]
-    pub updated_at: i64,
+    pub updated_at: Option<i64>,
 }
 
 impl ClientWeb3Wallet {
@@ -44,8 +44,8 @@ impl ClientWeb3Wallet {
             object,
             web3_wallet,
             verification: verification.map(Box::new),
-            created_at,
-            updated_at,
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
         }
     }
 }

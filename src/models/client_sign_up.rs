@@ -44,7 +44,7 @@ pub struct ClientSignUp {
     pub phone_number: Option<String>,
     #[serde(rename = "web3_wallet", deserialize_with = "Option::deserialize")]
     pub web3_wallet: Option<String>,
-    #[serde(rename = "password_enabled")]
+    #[serde(rename = "has_password", alias = "password_enabled")]
     pub password_enabled: bool,
     #[serde(rename = "first_name", deserialize_with = "Option::deserialize")]
     pub first_name: Option<String>,
@@ -57,8 +57,12 @@ pub struct ClientSignUp {
     #[serde(rename = "public_metadata", skip_serializing_if = "Option::is_none")]
     pub public_metadata: Option<std::collections::HashMap<String, serde_json::Value>>,
     #[serde(rename = "custom_action")]
-    pub custom_action: bool,
-    #[serde(rename = "external_id", deserialize_with = "Option::deserialize")]
+    pub custom_action: Option<bool>,
+    #[serde(
+        rename = "external_id",
+        default,
+        deserialize_with = "Option::deserialize"
+    )]
     pub external_id: Option<String>,
     #[serde(
         rename = "created_session_id",
@@ -69,7 +73,7 @@ pub struct ClientSignUp {
     pub created_user_id: Option<String>,
     /// Unix timestamp at which the sign up will be abandoned.
     #[serde(rename = "abandon_at")]
-    pub abandon_at: i64,
+    pub abandon_at: Option<i64>,
     /// Unix timestamp at which the user accepted the legal requirements.
     #[serde(rename = "legal_accepted_at", deserialize_with = "Option::deserialize")]
     pub legal_accepted_at: Option<i64>,
@@ -117,11 +121,11 @@ impl ClientSignUp {
             last_name,
             unsafe_metadata: None,
             public_metadata: None,
-            custom_action,
+            custom_action: Some(custom_action),
             external_id,
             created_session_id,
             created_user_id,
-            abandon_at,
+            abandon_at: Some(abandon_at),
             legal_accepted_at,
         }
     }
@@ -129,6 +133,8 @@ impl ClientSignUp {
 /// String representing the object's type. Objects of the same type share the same value.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum Object {
+    #[serde(rename = "sign_up")]
+    SignUp,
     #[serde(rename = "sign_up_attempt")]
     SignUpAttempt,
 }

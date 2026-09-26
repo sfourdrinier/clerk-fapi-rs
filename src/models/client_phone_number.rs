@@ -31,7 +31,7 @@ pub struct ClientPhoneNumber {
     )]
     pub default_second_factor: Option<bool>,
     #[serde(rename = "reserved")]
-    pub reserved: bool,
+    pub reserved: Option<bool>,
     #[serde(rename = "verification", deserialize_with = "Option::deserialize")]
     pub verification: Option<Box<models::ClientPhoneNumberVerification>>,
     #[serde(rename = "linked_to")]
@@ -45,10 +45,10 @@ pub struct ClientPhoneNumber {
     pub backup_codes: Option<Option<Vec<String>>>,
     /// Unix timestamp of creation
     #[serde(rename = "created_at")]
-    pub created_at: i64,
+    pub created_at: Option<i64>,
     /// Unix timestamp of creation
     #[serde(rename = "updated_at")]
-    pub updated_at: i64,
+    pub updated_at: Option<i64>,
 }
 
 impl ClientPhoneNumber {
@@ -68,12 +68,12 @@ impl ClientPhoneNumber {
             phone_number,
             reserved_for_second_factor: None,
             default_second_factor: None,
-            reserved,
+            reserved: Some(reserved),
             verification: verification.map(Box::new),
             linked_to,
             backup_codes: None,
-            created_at,
-            updated_at,
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
         }
     }
 }

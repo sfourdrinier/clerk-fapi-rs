@@ -68,10 +68,10 @@ pub struct ExternalAccountWithVerification {
     pub label: Option<Option<String>>,
     /// Unix timestamp of creation
     #[serde(rename = "created_at")]
-    pub created_at: i64,
+    pub created_at: Option<i64>,
     /// Unix timestamp of creation
     #[serde(rename = "updated_at")]
-    pub updated_at: i64,
+    pub updated_at: Option<i64>,
     #[serde(rename = "verification", deserialize_with = "Option::deserialize")]
     pub verification: Option<Box<models::ExternalAccountWithVerificationVerification>>,
 }
@@ -108,8 +108,8 @@ impl ExternalAccountWithVerification {
             phone_number: None,
             public_metadata,
             label: None,
-            created_at,
-            updated_at,
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
             verification: verification.map(Box::new),
         }
     }

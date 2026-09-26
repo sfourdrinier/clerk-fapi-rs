@@ -39,10 +39,10 @@ pub struct ClientClient {
     pub captcha_bypass: bool,
     /// Unix timestamp of creation.
     #[serde(rename = "created_at")]
-    pub created_at: i64,
+    pub created_at: Option<i64>,
     /// Unix timestamp of last update.
     #[serde(rename = "updated_at")]
-    pub updated_at: i64,
+    pub updated_at: Option<i64>,
 }
 
 impl ClientClient {
@@ -67,8 +67,8 @@ impl ClientClient {
             last_active_session_id,
             cookie_expires_at,
             captcha_bypass,
-            created_at,
-            updated_at,
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
         }
     }
 }
@@ -84,8 +84,8 @@ impl From<models::schemas_client_client::SchemasClientClient> for ClientClient {
             last_active_session_id: value.last_active_session_id,
             cookie_expires_at: value.cookie_expires_at,
             captcha_bypass: value.captcha_bypass,
-            created_at: value.created_at,
-            updated_at: value.updated_at,
+            created_at: Some(value.created_at),
+            updated_at: Some(value.updated_at),
         }
     }
 }

@@ -21,7 +21,7 @@ pub struct ClientEmailAddress {
     #[serde(rename = "email_address")]
     pub email_address: String,
     #[serde(rename = "reserved")]
-    pub reserved: bool,
+    pub reserved: Option<bool>,
     #[serde(rename = "verification", deserialize_with = "Option::deserialize")]
     pub verification: Option<Box<models::ClientEmailAddressVerification>>,
     #[serde(rename = "linked_to")]
@@ -34,10 +34,10 @@ pub struct ClientEmailAddress {
     pub matches_sso_connection: Option<bool>,
     /// Unix timestamp of creation
     #[serde(rename = "created_at")]
-    pub created_at: i64,
+    pub created_at: Option<i64>,
     /// Unix timestamp of creation
     #[serde(rename = "updated_at")]
-    pub updated_at: i64,
+    pub updated_at: Option<i64>,
 }
 
 impl ClientEmailAddress {
@@ -55,12 +55,12 @@ impl ClientEmailAddress {
             id,
             object,
             email_address,
-            reserved,
+            reserved: Some(reserved),
             verification: verification.map(Box::new),
             linked_to,
             matches_sso_connection: None,
-            created_at,
-            updated_at,
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
         }
     }
 }
