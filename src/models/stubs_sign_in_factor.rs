@@ -87,6 +87,10 @@ pub enum Strategy {
     OauthApple,
     #[serde(rename = "oauth_google")]
     OauthGoogle,
+    #[serde(rename = "oauth_token_apple")]
+    OauthTokenApple,
+    #[serde(rename = "oauth_token_google")]
+    OauthTokenGoogle,
     #[serde(rename = "oauth_facebook")]
     OauthFacebook,
     #[serde(rename = "oauth_hubspot")]
@@ -116,5 +120,18 @@ pub enum Strategy {
 impl Default for Strategy {
     fn default() -> Strategy {
         Self::Ticket
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Strategy;
+
+    #[test]
+    fn current_social_token_strategies_deserialize() {
+        for strategy in ["oauth_token_apple", "oauth_token_google"] {
+            serde_json::from_str::<Strategy>(&format!("\"{strategy}\""))
+                .expect("current Clerk social token strategy must deserialize");
+        }
     }
 }
